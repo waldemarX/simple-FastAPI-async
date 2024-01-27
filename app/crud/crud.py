@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from sqlalchemy.future import select
 from models.models import Customer, Product, Order
 from schemas.schemas import CustomerCreate, ProductCreate, OrderCreate
@@ -34,18 +35,35 @@ async def get_products(db: AsyncSession, skip: int = 0, limit: int = 10):
 
 async def create_order(db: AsyncSession, order: OrderCreate):
     db_order = Order(**order.model_dump())
+
+    # Add the order to the session
     db.add(db_order)
+
+    # Commit the changes to the database
     await db.commit()
+
+    # Refresh the order instance to get the updated values from the database
     await db.refresh(db_order)
+
+    # Explicitly load customer and product relationships using selectinload
+    stmt = (
+        select(Order)
+        .where(Order.id == db_order.id)
+        .options(selectinload(Order.customer), selectinload(Order.product))
+    )
+
+    # Execute the query and get the updated order instance with relationships loaded
+    db_order = (await db.execute(stmt)).scalar()
+
     return db_order
 
 
 async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 10):
     query = (
         select(Order)
+        .options(selectinload(Order.customer), selectinload(Order.product))
         .offset(skip)
         .limit(limit)
-        .options(select(Order).options(select(Customer), select(Product)))
     )
     result = await db.execute(query)
     return result.scalars().all()

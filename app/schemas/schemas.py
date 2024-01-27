@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class CustomerBase(BaseModel):
@@ -46,9 +47,11 @@ class OrderCreate(OrderBase):
 
 class Order(OrderBase):
     id: int
-    created_at: str
-    customer: Customer
-    product: Product
+    customer_id: int
+    product_id: int
+    quantity: int
+    total_price: float
+    created_at: datetime
 
     class Config:
         orm_mode = True

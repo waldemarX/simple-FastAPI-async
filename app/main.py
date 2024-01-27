@@ -73,7 +73,9 @@ async def read_products(
 async def create_order_api(
     order: OrderCreate, db: AsyncSession = Depends(get_db)
 ):
-    return await create_order(db, order)
+    db_order = await create_order(db, order)
+
+    return db_order
 
 
 @app.get("/orders/", response_model=list[Order])

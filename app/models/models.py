@@ -1,6 +1,6 @@
+from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -32,7 +32,7 @@ class Order(Base):
     product_id = Column(Integer, ForeignKey("products.id"))
     quantity = Column(Integer)
     total_price = Column(Float)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(), default=datetime.utcnow)
 
-    customer = relationship("Customer", back_populates="orders")
-    product = relationship("Product")
+    customer = relationship("Customer", back_populates="orders", lazy='joined')
+    product = relationship("Product", lazy='joined')
