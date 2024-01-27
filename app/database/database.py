@@ -17,9 +17,11 @@ Base = declarative_base()
 metadata = MetaData()
 
 
-async def create_tables():
+# Create tables
+async def create_tables(models):
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        for model in models:
+            await conn.run_sync(model.metadata.create_all)
 
 
 AsyncSessionLocal = sessionmaker(

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.database import AsyncSessionLocal, create_tables
+from database.database import AsyncSessionLocal
 from crud.crud import (
     create_customer,
     get_customers,
@@ -20,11 +20,6 @@ from schemas.schemas import (
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-
-
-@app.on_event("startup")
-async def on_startup():
-    await create_tables()
 
 
 # CORS middleware for handling cross-origin requests
