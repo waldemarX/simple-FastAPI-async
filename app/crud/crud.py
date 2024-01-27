@@ -7,8 +7,11 @@ from schemas.schemas import CustomerCreate, ProductCreate, OrderCreate
 
 async def create_customer(db: AsyncSession, customer: CustomerCreate):
     db_customer = Customer(**customer.model_dump())
+    # Add the customer to the session
     db.add(db_customer)
+    # Commit the changes to the database
     await db.commit()
+    # Refresh the order instance to get the updated values from the database
     await db.refresh(db_customer)
     return db_customer
 
@@ -35,26 +38,9 @@ async def get_products(db: AsyncSession, skip: int = 0, limit: int = 10):
 
 async def create_order(db: AsyncSession, order: OrderCreate):
     db_order = Order(**order.model_dump())
-
-    # Add the order to the session
     db.add(db_order)
-
-    # Commit the changes to the database
     await db.commit()
-
-    # Refresh the order instance to get the updated values from the database
     await db.refresh(db_order)
-
-    # Explicitly load customer and product relationships using selectinload
-    stmt = (
-        select(Order)
-        .where(Order.id == db_order.id)
-        .options(selectinload(Order.customer), selectinload(Order.product))
-    )
-
-    # Execute the query and get the updated order instance with relationships loaded
-    db_order = (await db.execute(stmt)).scalar()
-
     return db_order
 
 
